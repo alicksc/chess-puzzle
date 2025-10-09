@@ -20,5 +20,10 @@
   "homepage": "https://github.com/alicksc/chess-puzzle#readme",
   "devDependencies": {
     "electron": "^38.2.2"
+  },
+  "dependencies": {
+    "chess.js": "^1.4.0",
+    "chessboardjs": "^0.0.1",
+    "jquery": "^3.7.1"
   }
 }
