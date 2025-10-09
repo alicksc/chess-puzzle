@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     position: 'start',
     draggable: true,
     dropOffBoard: 'snapback',  // pieces return if dropped off board
-    pieceTheme: ''
+    pieceTheme: 'libs/pieces/default/{piece}.svg'
   });
 
   // Optional: Connect to chess.js for rules
