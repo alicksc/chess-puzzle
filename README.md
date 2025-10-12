@@ -69,11 +69,13 @@ chess-puzzle/
 
 ## Credits
 
-Special thanks to those who provided these incredible libraries!
+Special thanks to those who provided these incredible libraries and. resources!
 
 [chess.js](https://github.com/jhlywa/chess.js) by Jeffrey Hlywa
 
 [chessboard.js](https://github.com/oakmac/chessboardjs) by Chris Oakman
+
+[SVG Chess Pieces](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces) by Wikimedia Commons
 
 ## License
 
