@@ -71,8 +71,6 @@ chess-puzzle/
 
 Special thanks to those who provided these incredible libraries!
 
-This project uses the following open-source libraries:
-
 [chess.js](https://github.com/jhlywa/chess.js) by Jeffrey Hlywa
 
 [chessboard.js](https://github.com/oakmac/chessboardjs) by Chris Oakman
