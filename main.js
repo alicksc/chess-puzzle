@@ -8,7 +8,7 @@ function createWindow() {
     resizable: true,
     autoHideMenuBar: true,
     webPreferences: {
-      nodeIntegration: true, // allows you to use Node in the browser (for now)
+      nodeIntegration: false, // allows you to use Node in the browser (for now)
     }
   });
 
