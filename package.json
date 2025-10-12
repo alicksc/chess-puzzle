@@ -2,7 +2,7 @@
   "name": "chess-puzzle",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "./js/main.js",
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,6 +24,7 @@
   "dependencies": {
     "chess.js": "^1.4.0",
     "chessboardjs": "^0.0.1",
+    "csv-parser": "^3.2.0",
     "jquery": "^3.7.1"
   }
 }

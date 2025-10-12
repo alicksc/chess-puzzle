@@ -1,4 +1,4 @@
-import { Chess } from './libs/chess.js';
+import { Chess } from '../libs/chess.js';
 
 var board = null;
 var game = new Chess();
@@ -69,6 +69,7 @@ var config = {
 board = Chessboard('board', config);
 
 updateStatus();
+
 // document.addEventListener("DOMContentLoaded", () => {
 //   // Optional: Connect to chess.js for rules
 //   const game = new Chess();
