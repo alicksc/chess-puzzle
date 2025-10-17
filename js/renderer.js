@@ -1,97 +1,192 @@
 import { Chess } from '../libs/chess.js';
-import puzzles from '../puzzles/puzzles-easy.json';
 
-// Initialize board and game
+// Constants
+const PUZZLE_PATH = '../puzzles/puzzles-easy.json';
+const DEFAULT_THEME = 'libs/pieces/default/{piece}.svg'
+
+// Initialize variables
 var board = null;
-var game = new Chess();
+var game = null;
+var solutionMoves = [];
+var moveIndex = 0;
+var playerColor = 'white';
 
-// Get random puzzle from list
-const puzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
 
-// Get puzzle solution
-const solutionMoves = puzzle.Moves.split(' ');
+/**
+ * Loads random puzzle in from JSON file
+ * @param {string} path - Path to easy puzzles JSON file
+ * @returns {object} - A single puzzle object
+ */
+async function loadRandomPuzzle(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`Failed to fetch puzzles: ${response.statusText}`);
 
-function onDragStart(source, piece, position, orientation) {
-  if(game.isGameOver()) return false;
+  const puzzles = await response.json();
+  const randomIndex = Math.floor(Math.random() * puzzles.length);
+  return puzzles[randomIndex];
+}
 
-  if((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-      (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-    return false;
+
+/**
+ * Initializes the random puzzle and chess logic
+ * @param {object} puzzle - The puzzle object
+ */
+function initializeGame(puzzle) {
+  game = new Chess(puzzle.fen);
+
+  // Save puzzle moves solution
+  solutionMoves = puzzle.moves;
+
+  // Reset move tracker
+  moveIndex = 0;
+
+  // Determine player color using FEN
+  if(puzzle.fen.includes('w')) {
+    playerColor = 'white';
+  } else if(puzzle.fen.includes('b')){
+    playerColor = 'black'
   }
 }
-  
-let moveIndex = 0;
 
+
+/**
+ * Initializes visual chess board using Chessboard.js
+ * @param {object} puzzle - The puzzle object
+ */
+function initializeBoard(puzzle) {
+  board = Chessboard('board', {
+    draggable: true,
+    position: puzzle.fen,
+    orientation: playerColor,
+    pieceTheme: DEFAULT_THEME,
+    onDragStart,
+    onDrop,
+    onSnapEnd
+  });
+}
+
+
+
+
+
+/**
+ * Prevent moving when it's not player's turn
+ * @param {*} source 
+ * @param {*} piece 
+ * @returns 
+ */
+function onDragStart(source, piece) {
+  if (game.isGameOver()) return false;
+  if ((game.turn() === 'w' && piece.startsWith('b')) ||
+      (game.turn() === 'b' && piece.startsWith('w'))) return false;
+}
+
+
+/**
+ * User plays a move
+ * @param {*} source 
+ * @param {*} target 
+ * @returns 
+ */
 function onDrop(source, target) {
   if (source === target) return;
 
-  const expectedMove = solutionMoves[moveIndex];
-  const actualMove = source + target;
+  const expected = solutionMoves[moveIndex];
+  const actual = source + target;
 
-  // Check if correct move was played
-  if (actualMove !== expectedMove) {
-    return 'snapback';
-  }
+  // Check if player has made the correct move
+  if(actual !== expected) return 'snapback';
 
-  var move = game.move({
+  // Player move
+  const move = game.move({
     from: source,
     to: target,
-    promotion: 'q'
-  });
+    promotion: 'q'    // default promotion to queen here
+  })
 
-  if (move === null) return 'snapback';
-
-  // Continue to next move if there is any
   moveIndex++;
+  board.position(game.fen());
+  updateStatus;
 
-  updateStatus();
-
-  // If puzzle is solved, finished
-  if (moveIndex >= solutionMoves.length) {
-    alert("Puzzle complete!");
+  // Check if puzzle is complete
+  if(moveIndex >= solutionMoves.length) {
+    alert('Puzzle complete!');
+    return;
   }
+
+  // Play opponent move
+  // autoMove();
 }
 
+
+// Sync board after animation
 function onSnapEnd() {
   board.position(game.fen());
 }
 
+
+
+/**
+ * Auto-play opponents move
+ * @returns 
+ */
+// function autoPlayMove() {
+//   if (moveIndex >= solutionMoves.length) return;
+
+//   const opponentMove = solutionMoves[moveIndex];
+//   const move = game.move({
+//     from: opponentMove.slice(0, 2),
+//     to: opponentMove.slice(2, 4),
+//     promotion: 'q',
+//   });
+
+//   if (move) {
+//     moveIndex++;
+//     board.position(game.fen());
+//     updateStatus();
+//   }
+// }
+
+
+/**
+ * Update game status
+ */
 function updateStatus() {
-  var status = '';
+  let status = '';
+  const moveColor = game.turn() === 'w' ? 'White' : 'Black';
 
-  var moveColor = 'White'
-  if(game.turn() === 'b') {
-    moveColor = 'Black';
+  if (game.isCheckmate()) {
+    status = `Game over — ${moveColor} is in checkmate.`;
+  } else if (game.isDraw()) {
+    status = 'Game over — drawn position.';
+  } else {
+    status = `${moveColor} to move.`;
+    if (game.isCheck()) status += ` ${moveColor} is in check.`;
   }
 
-  if(game.isCheckmate()) {
-    status = 'Game over, ' + moveColor + ' is in checkmate.';
-  }
+  // Optional: display in <div id="status">
+  const statusDiv = document.getElementById('status');
+  if (statusDiv) statusDiv.textContent = status;
+  else console.log(status);
+}
 
-  else if(game.isDraw()) {
-    status = 'Game over, drawn position';
-  }
 
-  else {
-    status = moveColor + ' to move';
 
-    if(game.isCheck()) {
-      status += ', ' + moveColor + ' is in check'
-    }
+
+
+
+// Main entry point for app
+async function main() {
+  try {
+    const puzzle = await loadRandomPuzzle(PUZZLE_PATH);
+    initializeGame(puzzle);
+    initializeBoard(puzzle);
+    updateStatus();
+  } catch (error) {
+    console.error("Failed to initialize puzzle: ", error)
   }
 }
 
-// Initialize chess game with puzzle FEN
-game = new Chess(puzzle.FEN);
+main();
 
-// Initialize new chess game
-board = Chessboard('board', {
-  draggable: true,
-  position: puzzle.FEN,
-  onDragStart: onDragStart,
-  onDrop: onDrop,
-  onSnapEnd: onSnapEnd,
-  pieceTheme: 'libs/pieces/default/{piece}.svg'
-});
 
-updateStatus();
