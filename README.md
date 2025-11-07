@@ -1,6 +1,10 @@
 # Chess Puzzle Trainer
 
-A desktop chess puzzle trainer built with Electron, featuring drag-and-drop piece movement, FEN-based puzzle loading, and move validation powered by [chess.js](https://github.com/jhlywa/chess.js) and [chessboard.js](https://github.com/oakmac/chessboardjs).
+Minimal GitHub Pages version for my personal portfolio!
+
+---
+
+A desktop chess puzzle trainer featuring drag-and-drop piece movement, FEN-based puzzle loading, and move validation powered by [chess.js](https://github.com/jhlywa/chess.js) and [chessboard.js](https://github.com/oakmac/chessboardjs).
 
 ![screenshot](assets/images/chess-puzzle.png)
 
@@ -40,34 +44,7 @@ A desktop chess puzzle trainer built with Electron, featuring drag-and-drop piec
     ```bash
     npm start
     ```
-<!-- 
-## File Structure
-```bash
-chess-puzzle/
-├── index.html
-├── js/
-│   └── main.js
-│   └── script.js
-│   └── renderer.js
-│   └── convert.js
-├── css/
-│   └── style.css
-├── libs/
-│   └── jquery.js
-│   └── chess.js
-│   └── chessboard.js
-│   └── chessboard.css
-│   └── pieces/
-├── puzzles/
-│   └── lichess_db_puzzle.csv
-│   └── puzzles-easy.json
-│   └── puzzles-medium.json
-│   └── puzzles-hard.json
-│   └── puzzles-insane.json
-│   └── puzzles-GM.json
-└── ...
-```
- -->
+
 
 ## Credits
 
