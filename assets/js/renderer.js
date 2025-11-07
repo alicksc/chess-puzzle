@@ -1,8 +1,8 @@
 import { Chess } from '../libs/chess.js';
 
 // Constants
-const PUZZLE_PATH = '../puzzles/puzzles-easy.json';
-const DEFAULT_THEME = 'libs/pieces/default/{piece}.svg';
+const PUZZLE_PATH = 'assets/puzzles/puzzles-easy.json';
+const DEFAULT_THEME = 'assets/libs/pieces/default/{piece}.svg';
 
 // DOM
 const boardEl = document.getElementById('board');
