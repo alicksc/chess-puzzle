@@ -2,56 +2,42 @@ import { Chess } from '../libs/chess.js';
 
 // Constants
 const PUZZLE_PATH = '../puzzles/puzzles-easy.json';
-const DEFAULT_THEME = 'libs/pieces/default/{piece}.svg'
+const DEFAULT_THEME = 'libs/pieces/default/{piece}.svg';
 
-// Initialize variables
-var board = null;
-var game = null;
-var solutionMoves = [];
-var moveIndex = 0;
-var playerColor = 'white';
+// DOM
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
 
+// Game State
+let board = null;
+let game = null;
+let solutionMoves = [];
+let moveIndex = 0;
+let playerColor = 'white';
 
 /**
- * Loads random puzzle in from JSON file
- * @param {string} path - Path to easy puzzles JSON file
- * @returns {object} - A single puzzle object
+ * Load a random puzzle from the JSON file.
  */
 async function loadRandomPuzzle(path) {
-  const response = await fetch(path);
-  if (!response.ok) throw new Error(`Failed to fetch puzzles: ${response.statusText}`);
-
-  const puzzles = await response.json();
-  const randomIndex = Math.floor(Math.random() * puzzles.length);
-  return puzzles[randomIndex];
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`Failed to load puzzles: ${res.statusText}`);
+  const puzzles = await res.json();
+  const randomPuzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
+  return randomPuzzle;
 }
 
-
 /**
- * Initializes the random puzzle and chess logic
- * @param {object} puzzle - The puzzle object
+ * Setup puzzle logic.
  */
 function initializeGame(puzzle) {
   game = new Chess(puzzle.fen);
-
-  // Save puzzle moves solution
   solutionMoves = puzzle.moves;
-
-  // Reset move tracker
   moveIndex = 0;
-
-  // Determine player color using FEN
-  if(puzzle.fen.includes('w')) {
-    playerColor = 'white';
-  } else if(puzzle.fen.includes('b')){
-    playerColor = 'black'
-  }
+  playerColor = puzzle.fen.includes('w') ? 'white' : 'black';
 }
 
-
 /**
- * Initializes visual chess board using Chessboard.js
- * @param {object} puzzle - The puzzle object
+ * Create the visual board.
  */
 function initializeBoard(puzzle) {
   board = Chessboard('board', {
@@ -61,19 +47,14 @@ function initializeBoard(puzzle) {
     pieceTheme: DEFAULT_THEME,
     onDragStart,
     onDrop,
-    onSnapEnd
+    onSnapEnd,
+    onMouseoverSquare,
+    onMouseoutSquare
   });
 }
 
-
-
-
-
 /**
- * Prevent moving when it's not player's turn
- * @param {*} source 
- * @param {*} piece 
- * @returns 
+ * Only allow moving your own pieces.
  */
 function onDragStart(source, piece) {
   if (game.isGameOver()) return false;
@@ -81,12 +62,8 @@ function onDragStart(source, piece) {
       (game.turn() === 'b' && piece.startsWith('w'))) return false;
 }
 
-
 /**
- * User plays a move
- * @param {*} source 
- * @param {*} target 
- * @returns 
+ * Handle player move.
  */
 function onDrop(source, target) {
   if (source === target) return;
@@ -94,62 +71,71 @@ function onDrop(source, target) {
   const expected = solutionMoves[moveIndex];
   const actual = source + target;
 
-  // Check if player has made the correct move
-  if(actual !== expected) return 'snapback';
+  if (actual !== expected) return 'snapback';
 
-  // Player move
-  const move = game.move({
-    from: source,
-    to: target,
-    promotion: 'q'    // default promotion to queen here
-  })
+  const move = game.move({ from: source, to: target, promotion: 'q' });
+  if (!move) return 'snapback';
 
   moveIndex++;
   board.position(game.fen());
-  updateStatus;
+  highlightMove(source, target);
+  updateStatus();
 
-  // Check if puzzle is complete
-  if(moveIndex >= solutionMoves.length) {
-    alert('Puzzle complete!');
+  if (moveIndex >= solutionMoves.length) {
+    alert("Puzzle complete!");
     return;
   }
 
-  // Play opponent move
-  // autoMove();
+  // You can enable auto-move here later if needed
 }
 
-
-// Sync board after animation
+/**
+ * Sync board to internal game state.
+ */
 function onSnapEnd() {
   board.position(game.fen());
 }
 
-
-
 /**
- * Auto-play opponents move
- * @returns 
+ * Show legal target squares on hover.
  */
-// function autoPlayMove() {
-//   if (moveIndex >= solutionMoves.length) return;
+function onMouseoverSquare(square, piece) {
+  const moves = game.moves({ square, verbose: true });
+  if (!moves.length) return;
 
-//   const opponentMove = solutionMoves[moveIndex];
-//   const move = game.move({
-//     from: opponentMove.slice(0, 2),
-//     to: opponentMove.slice(2, 4),
-//     promotion: 'q',
-//   });
-
-//   if (move) {
-//     moveIndex++;
-//     board.position(game.fen());
-//     updateStatus();
-//   }
-// }
-
+  moves.forEach(move => {
+    const sq = boardEl.querySelector(`.square-${move.to}`);
+    if (sq) sq.classList.add('square-available');
+  });
+}
 
 /**
- * Update game status
+ * Clear highlight when mouse leaves.
+ */
+function onMouseoutSquare(square, piece) {
+  boardEl.querySelectorAll('.square-available').forEach(el => {
+    el.classList.remove('square-available');
+  });
+}
+
+/**
+ * Highlight the move from `from` to `to`.
+ */
+function highlightMove(from, to) {
+  // Clear previous highlights
+  boardEl.querySelectorAll('.square-highlight').forEach(el => {
+    el.classList.remove('square-highlight');
+  });
+
+  const fromEl = boardEl.querySelector(`.square-${from}`);
+  const toEl = boardEl.querySelector(`.square-${to}`);
+
+  if (fromEl) fromEl.classList.add('square-highlight');
+  if (toEl) toEl.classList.add('square-highlight');
+}
+
+/**
+ * Display the game status (turn, check, etc.)
  */
 function updateStatus() {
   let status = '';
@@ -158,35 +144,28 @@ function updateStatus() {
   if (game.isCheckmate()) {
     status = `Game over — ${moveColor} is in checkmate.`;
   } else if (game.isDraw()) {
-    status = 'Game over — drawn position.';
+    status = 'Game over — Draw.';
   } else {
     status = `${moveColor} to move.`;
     if (game.isCheck()) status += ` ${moveColor} is in check.`;
   }
 
-  // Optional: display in <div id="status">
-  const statusDiv = document.getElementById('status');
-  if (statusDiv) statusDiv.textContent = status;
+  if (statusEl) statusEl.textContent = status;
   else console.log(status);
 }
 
-
-
-
-
-
-// Main entry point for app
+/**
+ * App entry point.
+ */
 async function main() {
   try {
     const puzzle = await loadRandomPuzzle(PUZZLE_PATH);
     initializeGame(puzzle);
     initializeBoard(puzzle);
     updateStatus();
-  } catch (error) {
-    console.error("Failed to initialize puzzle: ", error)
+  } catch (err) {
+    console.error("Initialization failed:", err);
   }
 }
 
 main();
-
-

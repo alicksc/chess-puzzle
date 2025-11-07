@@ -2,6 +2,8 @@
 
 A desktop chess puzzle trainer built with Electron, featuring drag-and-drop piece movement, FEN-based puzzle loading, and move validation powered by [chess.js](https://github.com/jhlywa/chess.js) and [chessboard.js](https://github.com/oakmac/chessboardjs).
 
+![screenshot](chess-puzzle.png)
+
 ## Tasks
 
 - Implement actual puzzle games from Lichess puzzle library
