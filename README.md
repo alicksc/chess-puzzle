@@ -48,7 +48,7 @@ A desktop chess puzzle trainer featuring drag-and-drop piece movement, FEN-based
 
 ## Credits
 
-Special thanks to those who provided these incredible libraries and. resources!
+Special thanks to those who provided these incredible libraries and resources!
 
 [chess.js](https://github.com/jhlywa/chess.js) by Jeffrey Hlywa
 
